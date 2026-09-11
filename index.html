@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sathyabama AI Portal - Hybrid API Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700&family=Shippori+Mincho:wght@400;700&family=Yuji+Boku&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --washi-paper: #FAF6EE;
+            --sumi-ink: #1C1B1A;
+            --crimson-stamp: #BC002D;
+            --faded-ink: #4A4A4A;
+        }
+
+        body {
+            background-color: var(--washi-paper);
+            color: var(--sumi-ink);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-image: radial-gradient(var(--faded-ink) 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+            background-attachment: fixed;
+        }
+
+        .font-yuji {
+            font-family: 'Yuji Boku', serif;
+        }
+
+        .font-mincho {
+            font-family: 'Shippori Mincho', serif;
+        }
+
+        .glass-card {
+            background: rgba(250, 246, 238, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(28, 27, 26, 0.1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .hanko-stamp {
+            border: 2px solid var(--crimson-stamp);
+            color: var(--crimson-stamp);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-family: 'Yuji Boku', serif;
+            display: inline-block;
+            transform: rotate(-2deg);
+        }
+
+        .btn-primary {
+            background-color: var(--sumi-ink);
+            color: var(--washi-paper);
+            padding: 0.5rem 1.5rem;
+            border-radius: 9999px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--crimson-stamp);
+            transform: scale(1.02);
+        }
+
+        /* Continuous Smooth Scrolling Marquee */
+        .marquee-container {
+            overflow: hidden;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+        }
+
+        .marquee-content {
+            display: inline-block;
+            animation: marquee 22s linear infinite;
+        }
+
+        .marquee-container:hover .marquee-content {
+            animation-play-state: paused;
+        }
+
+        @keyframes marquee {
+            0% {
+                transform: translateX(100%);
+            }
+
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        /* Loading Dots Animation */
+        .typing-indicator span {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background-color: #000;
+            border-radius: 50%;
+            animation: typing 1.4s infinite both;
+            margin: 0 2px;
+        }
+
+        .typing-indicator span:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0);
+            }
+
+            40% {
+                transform: scale(1);
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--faded-ink);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col">
+
+    <!-- Navigation -->
+    <nav class="glass-card sticky top-0 z-50 px-6 py-4 flex justify-between items-center border-b border-gray-200">
+        <div class="flex items-center gap-4">
+            <span class="hanko-stamp text-xl">SIA</span>
+            <h1 class="font-yuji text-2xl tracking-wide font-bold"><span data-i18n="nav_title">Sathyabama Portal</span>
+            </h1>
+        </div>
+        <div class="flex items-center gap-4">
+            <select id="langSelector" onchange="changeLanguage()"
+                class="bg-transparent border border-gray-300 rounded-md py-1 px-2 focus:outline-none focus:border-black font-mincho">
+                <option value="en">English</option>
+                <option value="ta">தமிழ் (Tamil)</option>
+                <option value="hi">हिन्दी (Hindi)</option>
+            </select>
+            <button onclick="togglePortal()" id="portalToggleBtn" class="btn-primary" data-i18n="btn_admin_portal">Admin
+                Portal</button>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-grow p-6 max-w-7xl mx-auto w-full">
+
+        <!-- ================= STUDENT PORTAL ================= -->
+        <div id="studentPortal" class="block space-y-6">
+
+            <!-- Scrolling Announcement Ticker -->
+            <div class="glass-card rounded-xl border-l-4 border-l-crimson-stamp p-3 flex items-center shadow-sm">
+                <div class="flex items-center gap-2 pr-4 border-r border-gray-300 shrink-0">
+                    <span class="w-2.5 h-2.5 rounded-full bg-red-600 animate-ping"></span>
+                    <span class="font-bold text-xs uppercase tracking-wider text-red-700 font-yuji">Notice Board:</span>
+                </div>
+                <div class="marquee-container flex-grow pl-4 cursor-pointer" title="Hover to pause">
+                    <span id="tickerText" class="marquee-content font-medium text-sm text-gray-800">
+                        Loading latest announcements...
+                    </span>
+                </div>
+            </div>
+
+            <div class="text-center py-6">
+                <h2 class="font-yuji text-4xl mb-3" data-i18n="welcome_title">Welcome to Sathyabama</h2>
+                <p class="font-mincho text-xl text-gray-600 max-w-2xl mx-auto" data-i18n="welcome_desc">Your intelligent
+                    campus guide. Powered by Hybrid AI architecture.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+                <!-- Hybrid AI Chat UI -->
+                <div class="glass-card rounded-2xl flex flex-col h-[750px] border-t-4 border-t-black shadow-lg">
+                    <div
+                        class="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50/50 rounded-t-2xl">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white font-yuji text-xl">
+                                AI</div>
+                            <div>
+                                <h3 class="font-bold" data-i18n="chat_title">Sathyabama AI Agent</h3>
+                                <p class="text-xs text-green-600" id="aiStatusText">● Hybrid Engine Online</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="chatBox" class="flex-grow p-4 overflow-y-auto space-y-4">
+                        <div class="flex justify-start">
+                            <div
+                                class="bg-white border border-gray-200 p-3 rounded-2xl rounded-tl-none max-w-[85%] shadow-sm">
+                                <p class="font-mincho" data-i18n="chat_welcome_msg">Hello! I am connected to the Gemini
+                                    RAG backend with an automatic local fallback. I will never freeze. Ask me a
+                                    question!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 border-t border-gray-200 bg-white/50 rounded-b-2xl">
+                        <div class="flex gap-2 relative">
+                            <input type="text" id="userInput" data-i18n-placeholder="chat_placeholder"
+                                placeholder="Ask complex questions about campus..."
+                                class="flex-grow px-4 py-3 rounded-full border border-gray-300 focus:outline-none focus:border-black focus:ring-1 focus:ring-black bg-white"
+                                onkeypress="handleKeyPress(event)">
+                            <button onclick="sendHybridMessage()" id="sendBtn"
+                                class="btn-primary flex items-center justify-center w-12 h-12 rounded-full p-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                    fill="currentColor">
+                                    <path
+                                        d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visual Campus GPS Directory -->
+                <div class="space-y-6">
+                    <h3 class="font-yuji text-2xl border-b-2 border-crimson-stamp inline-block pb-1"
+                        data-i18n="map_title">Campus GPS Directory</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        <div class="glass-card rounded-xl border-l-4 border-l-black overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=500&q=80"
+                                class="w-full h-24 object-cover">
+                            <div class="p-3">
+                                <div>
+                                    <h4 class="font-bold text-md mb-1" data-i18n="loc_gate">Main Gate</h4>
+                                </div>
+                                <button onclick="openMap(12.873003177542778, 80.22656963015994)"
+                                    class="btn-primary w-full text-xs py-2 mt-2" data-i18n="btn_go">Go 📍</button>
+                            </div>
+                        </div>
+                        <div class="glass-card rounded-xl border-l-4 border-l-black overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=500&q=80"
+                                class="w-full h-24 object-cover">
+                            <div class="p-3">
+                                <div>
+                                    <h4 class="font-bold text-md mb-1" data-i18n="loc_block_a">Block A</h4>
+                                </div>
+                                <button onclick="openMap(12.8745, 80.2230)" class="btn-primary w-full text-xs py-2 mt-2"
+                                    data-i18n="btn_go">Go 📍</button>
+                            </div>
+                        </div>
+                        <div class="glass-card rounded-xl border-l-4 border-l-black overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=500&q=80"
+                                class="w-full h-24 object-cover">
+                            <div class="p-3">
+                                <div>
+                                    <h4 class="font-bold text-md mb-1" data-i18n="loc_block_b">Block B</h4>
+                                </div>
+                                <button onclick="openMap(12.8740, 80.2224)" class="btn-primary w-full text-xs py-2 mt-2"
+                                    data-i18n="btn_go">Go 📍</button>
+                            </div>
+                        </div>
+                        <div class="glass-card rounded-xl border-l-4 border-l-black overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=500&q=80"
+                                class="w-full h-24 object-cover">
+                            <div class="p-3">
+                                <div>
+                                    <h4 class="font-bold text-md mb-1" data-i18n="loc_lib">Library</h4>
+                                </div>
+                                <button onclick="openMap(12.8738, 80.2220)" class="btn-primary w-full text-xs py-2 mt-2"
+                                    data-i18n="btn_go">Go 📍</button>
+                            </div>
+                        </div>
+                        <div class="glass-card rounded-xl border-l-4 border-l-black overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=500&q=80"
+                                class="w-full h-24 object-cover">
+                            <div class="p-3">
+                                <div>
+                                    <h4 class="font-bold text-md mb-1" data-i18n="loc_mess">Mess</h4>
+                                </div>
+                                <button onclick="openMap(12.8752, 80.2232)" class="btn-primary w-full text-xs py-2 mt-2"
+                                    data-i18n="btn_go">Go 📍</button>
+                            </div>
+                        </div>
+                        <div class="glass-card rounded-xl border-l-4 border-l-black overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1507676184212-d0c30a5c7827?w=500&q=80"
+                                class="w-full h-24 object-cover">
+                            <div class="p-3">
+                                <div>
+                                    <h4 class="font-bold text-md mb-1" data-i18n="loc_audi">Auditorium</h4>
+                                </div>
+                                <button onclick="openMap(12.8746, 80.2227)" class="btn-primary w-full text-xs py-2 mt-2"
+                                    data-i18n="btn_go">Go 📍</button>
+                            </div>
+                        </div>
+                        <div class="glass-card rounded-xl border-l-4 border-l-black overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=500&q=80"
+                                class="w-full h-24 object-cover">
+                            <div class="p-3">
+                                <div>
+                                    <h4 class="font-bold text-md mb-1" data-i18n="loc_b_hostel">Boys Hostel</h4>
+                                </div>
+                                <button onclick="openMap(12.8730, 80.2214)" class="btn-primary w-full text-xs py-2 mt-2"
+                                    data-i18n="btn_go">Go 📍</button>
+                            </div>
+                        </div>
+                        <div class="glass-card rounded-xl border-l-4 border-l-black overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=500&q=80"
+                                class="w-full h-24 object-cover">
+                            <div class="p-3">
+                                <div>
+                                    <h4 class="font-bold text-md mb-1" data-i18n="loc_g_hostel">Girls Hostel</h4>
+                                </div>
+                                <button onclick="openMap(12.8725, 80.2208)" class="btn-primary w-full text-xs py-2 mt-2"
+                                    data-i18n="btn_go">Go 📍</button>
+                            </div>
+                        </div>
+                        <div class="glass-card rounded-xl border-l-4 border-l-black overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?w=500&q=80"
+                                class="w-full h-24 object-cover">
+                            <div class="p-3">
+                                <div>
+                                    <h4 class="font-bold text-md mb-1" data-i18n="loc_exam">Exam Hall 1</h4>
+                                </div>
+                                <button onclick="openMap(12.8743, 80.2225)" class="btn-primary w-full text-xs py-2 mt-2"
+                                    data-i18n="btn_go">Go 📍</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= ADMIN PORTAL ================= -->
+        <div id="adminPortal" class="hidden space-y-8">
+            <div class="text-center py-8">
+                <span class="hanko-stamp text-2xl mb-2">ADMIN</span>
+                <h2 class="font-yuji text-4xl mb-4" data-i18n="admin_title">AI API & Knowledge Config</h2>
+                <p class="font-mincho text-xl text-gray-600 max-w-2xl mx-auto">Publish live announcements, register
+                    students, and inject knowledge.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                <!-- 📢 Announcement Broadcast Card -->
+                <div class="glass-card p-6 rounded-2xl border-t-4 border-t-crimson-stamp flex flex-col space-y-4">
+                    <h3 class="font-bold text-xl">1. Broadcast Campus Announcement</h3>
+                    <p class="text-sm text-gray-600">Enter holiday alerts, exam schedules, or circular updates to scroll
+                        across the student portal.</p>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Announcement Message:</label>
+                        <textarea id="adminAnnouncementInput" rows="3"
+                            placeholder="e.g. 📢 Campus is closed tomorrow due to heavy rain. Semester lab examinations commence next Monday."
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md text-sm"></textarea>
+                    </div>
+
+                    <button onclick="postAnnouncement()" class="btn-primary w-full py-2.5 text-md">Publish Announcement
+                        🚀</button>
+                    <div id="announcementSuccess"
+                        class="hidden p-3 bg-green-100 text-green-800 rounded-md text-sm font-medium border border-green-200">
+                        ✓ Announcement broadcasted live!</div>
+                </div>
+
+                <!-- Local Knowledge Injection -->
+                <div class="glass-card p-6 rounded-2xl border-t-4 border-t-black flex flex-col space-y-4">
+                    <h3 class="font-bold text-xl">2. Add Local System Knowledge</h3>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Keywords:</label>
+                        <input type="text" id="trainKeywords" placeholder="e.g., sports, symposium"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Response / Fact:</label>
+                        <textarea id="trainResponse" rows="2"
+                            placeholder="e.g., The campus library remains open until 8 PM during examinations."
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md"></textarea>
+                    </div>
+                    <button onclick="trainNewKnowledge()" class="btn-primary w-full py-2.5 text-md">Inject
+                        Context</button>
+                    <div id="trainSuccess"
+                        class="hidden p-3 bg-green-100 text-green-800 rounded-md text-sm font-medium border border-green-200">
+                        ✓ Context updated!</div>
+                </div>
+
+                <!-- 3. Register Student Card -->
+                <div
+                    class="glass-card p-6 rounded-2xl border-t-4 border-t-crimson-stamp flex flex-col space-y-4 md:col-span-2">
+                    <h3 class="font-bold text-xl">3. Register Student & Generate Login Credentials</h3>
+                    <p class="text-sm text-gray-600">Enter student details below. The system will auto-generate an
+                        official Student ID and login password.</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Full Name:</label>
+                            <input type="text" id="stdName" placeholder="e.g. Ramesh Kumar"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Register / Roll No:</label>
+                            <input type="text" id="stdReg" placeholder="e.g. 41110023"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Department:</label>
+                            <input type="text" id="stdDept" placeholder="e.g. CSE / IT"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Batch Year:</label>
+                            <input type="text" id="stdBatch" placeholder="e.g. 2026"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                        </div>
+                    </div>
+
+                    <button onclick="registerNewStudent()" class="btn-primary w-full py-3 text-md mt-2">Generate Login
+                        Credentials 🪪</button>
+
+                    <!-- Credential Card Output -->
+                    <div id="credentialBox"
+                        class="hidden p-4 bg-white border-2 border-dashed border-gray-400 rounded-xl space-y-2 mt-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold uppercase tracking-wider text-gray-500">Student
+                                Passcard</span>
+                            <span class="hanko-stamp text-xs">OFFICIAL</span>
+                        </div>
+                        <p class="text-sm"><strong>Name:</strong> <span id="outName"></span></p>
+                        <p class="text-sm"><strong>Register No:</strong> <span id="outReg"></span></p>
+                        <div class="bg-gray-100 p-3 rounded-md font-mono text-sm space-y-1">
+                            <p><strong>Generated Student ID:</strong> <span id="outId"
+                                    class="text-blue-600 font-bold"></span></p>
+                            <p><strong>Generated Password:</strong> <span id="outPass"
+                                    class="text-red-600 font-bold"></span></p>
+                        </div>
+                        <p class="text-[11px] text-gray-500 italic">This student record is saved in the database. Share
+                            these credentials with the student.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // Local knowledge corpus for offline fallback
+        let knowledgeCorpus = [
+            { keywords: "gate main entrance omr", response: "Sathyabama Main Gate is at the OMR Road Entrance. <button onclick=\"openMap(12.873003177542778, 80.22656963015994)\" class=\"text-blue-600 underline font-bold\">Open Gate 📍</button>", image: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=500&q=80" },
+            { keywords: "exam hall center rules", response: "Central Examination Hall 1 is at Admin Building Ground. Minimum 75% attendance required. <button onclick=\"openMap(12.8743, 80.2225)\" class=\"text-blue-600 underline font-bold\">Open Exam Hall 📍</button>", image: "https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?w=500&q=80" },
+            { keywords: "computing cse it software block a", response: "Block A houses the CSE & IT Wing on the 2nd Floor. <button onclick=\"openMap(12.8745, 80.2230)\" class=\"text-blue-600 underline font-bold\">Open Block A 📍</button>", image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=500&q=80" },
+            { keywords: "electrical ece eee block b", response: "Block B houses the ECE & EEE Wing on the 1st Floor. <button onclick=\"openMap(12.8740, 80.2224)\" class=\"text-blue-600 underline font-bold\">Open Block B 📍</button>", image: "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=500&q=80" },
+            { keywords: "library books study", response: "Dr. Remi Bai Central Library is in the Quadrangle Center. <button onclick=\"openMap(12.8738, 80.2220)\" class=\"text-blue-600 underline font-bold\">Open Library 📍</button>", image: "https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=500&q=80" },
+            { keywords: "mess food lunch dining central", response: "Central Student Dining Mess is the Central Dining Complex. <button onclick=\"openMap(12.8752, 80.2232)\" class=\"text-blue-600 underline font-bold\">Open Mess 📍</button>", image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=500&q=80" }
+        ];
+
+        // 📢 FETCH AND BROADCAST ANNOUNCEMENT FUNCTIONS
+        async function fetchAnnouncement() {
+            try {
+                const response = await fetch("http://127.0.0.1:8000/api/announcement");
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById("tickerText").innerText = data.message;
+                }
+            } catch (err) {
+                document.getElementById("tickerText").innerText = "📢 Welcome to Sathyabama AI Portal! Check the GPS directory for campus navigation.";
+            }
+        }
+
+        async function postAnnouncement() {
+            const input = document.getElementById("adminAnnouncementInput");
+            const msg = input.value.trim();
+            if (!msg) {
+                alert("Please enter an announcement message.");
+                return;
+            }
+
+            try {
+                const response = await fetch("http://127.0.0.1:8000/api/admin/announcement", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: msg })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById("tickerText").innerText = data.message;
+                    input.value = "";
+                    const success = document.getElementById("announcementSuccess");
+                    success.classList.remove("hidden");
+                    setTimeout(() => success.classList.add("hidden"), 3500);
+                } else {
+                    alert("Failed to publish announcement.");
+                }
+            } catch (err) {
+                console.error("Announcement error:", err);
+                alert("Could not reach backend server.");
+            }
+        }
+
+        // ⚡ Chat request to FastAPI Backend
+        async function fetchHybridResponse(userMessage) {
+            try {
+                const response = await fetch("http://127.0.0.1:8000/api/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ query: userMessage })
+                });
+
+                if (!response.ok) throw new Error(`Server status ${response.status}`);
+                const data = await response.json();
+                return data.reply;
+
+            } catch (err) {
+                console.warn("API server unreachable, fallback to local corpus:", err);
+                let inputTokens = userMessage.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/);
+                let bestMatch = null;
+                let highestScore = 0;
+
+                knowledgeCorpus.forEach(doc => {
+                    let docTokens = doc.keywords.toLowerCase().split(/\s+/);
+                    let overlap = inputTokens.filter(token => docTokens.includes(token) && token.length > 2).length;
+                    let score = overlap / (docTokens.length + inputTokens.length - overlap);
+                    if (score > highestScore) {
+                        highestScore = score;
+                        bestMatch = doc;
+                    }
+                });
+
+                if (highestScore > 0.01 && bestMatch) {
+                    let res = `<em>(Offline Mode)</em><br><br>${bestMatch.response}`;
+                    if (bestMatch.image) res += `<br><img src='${bestMatch.image}' class='mt-3 rounded-xl w-full h-48 object-cover border border-gray-200'>`;
+                    return res;
+                }
+                return "Could not reach the server and no local record was found. Please ensure python app.py is running.";
+            }
+        }
+
+        function handleKeyPress(e) { if (e.key === 'Enter') sendHybridMessage(); }
+
+        async function sendHybridMessage() {
+            const input = document.getElementById('userInput');
+            const sendBtn = document.getElementById('sendBtn');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            const chatBox = document.getElementById('chatBox');
+            chatBox.innerHTML += `
+                <div class="flex justify-end">
+                    <div class="bg-black text-white p-3 rounded-2xl rounded-tr-none max-w-[80%] shadow-sm">
+                        <p>${msg}</p>
+                    </div>
+                </div>`;
+            input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            const typingId = 'typing-' + Date.now();
+            chatBox.innerHTML += `
+                <div id="${typingId}" class="flex justify-start">
+                    <div class="bg-white border border-gray-200 p-4 rounded-2xl rounded-tl-none max-w-[85%] shadow-sm typing-indicator">
+                        <span></span><span></span><span></span>
+                    </div>
+                </div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            input.disabled = true;
+            sendBtn.disabled = true;
+            sendBtn.style.opacity = '0.5';
+
+            try {
+                const aiResponseText = await fetchHybridResponse(msg);
+                document.getElementById(typingId).remove();
+                chatBox.innerHTML += `
+                    <div class="flex justify-start">
+                        <div class="bg-white border border-gray-200 p-3 rounded-2xl rounded-tl-none max-w-[85%] shadow-sm">
+                            <div class="font-mincho leading-relaxed text-gray-800">${aiResponseText}</div>
+                        </div>
+                    </div>`;
+            } catch (criticalError) {
+                document.getElementById(typingId).remove();
+                chatBox.innerHTML += `<div class="text-red-500 font-bold p-3">System Critical Error: Chat engine failed.</div>`;
+            } finally {
+                chatBox.scrollTop = chatBox.scrollHeight;
+                input.disabled = false;
+                sendBtn.disabled = false;
+                sendBtn.style.opacity = '1';
+                input.focus();
+            }
+        }
+
+        async function registerNewStudent() {
+            const name = document.getElementById("stdName").value.trim();
+            const reg_no = document.getElementById("stdReg").value.trim();
+            const department = document.getElementById("stdDept").value.trim();
+            const batch = document.getElementById("stdBatch").value.trim();
+
+            if (!name || !reg_no || !department || !batch) {
+                alert("Please fill out all 4 fields.");
+                return;
+            }
+
+            try {
+                const response = await fetch("http://127.0.0.1:8000/api/admin/register-student", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name, reg_no, department, batch })
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    alert(data.detail || "Registration failed.");
+                    return;
+                }
+
+                document.getElementById("outName").innerText = data.name;
+                document.getElementById("outReg").innerText = data.reg_no;
+                document.getElementById("outId").innerText = data.student_id;
+                document.getElementById("outPass").innerText = data.password;
+                document.getElementById("credentialBox").classList.remove("hidden");
+
+                document.getElementById("stdName").value = "";
+                document.getElementById("stdReg").value = "";
+                document.getElementById("stdDept").value = "";
+                document.getElementById("stdBatch").value = "";
+            } catch (err) {
+                alert("Could not connect to backend server.");
+            }
+        }
+
+        function trainNewKnowledge() {
+            const keywords = document.getElementById("trainKeywords").value.trim();
+            const response = document.getElementById("trainResponse").value.trim();
+            if (!response || !keywords) {
+                alert("Please enter both Keywords and Response.");
+                return;
+            }
+            knowledgeCorpus.push({ keywords: keywords, response: response });
+            document.getElementById("trainKeywords").value = "";
+            document.getElementById("trainResponse").value = "";
+            const successDiv = document.getElementById("trainSuccess");
+            successDiv.classList.remove("hidden");
+            setTimeout(() => successDiv.classList.add("hidden"), 3000);
+        }
+
+        function openMap(lat, lng) { window.open(`https://maps.google.com/?q=${lat},${lng}`, '_blank'); }
+
+        let isAdminView = false;
+        function togglePortal() {
+            isAdminView = !isAdminView;
+            const btn = document.getElementById("portalToggleBtn");
+            const lang = document.getElementById("langSelector").value;
+            if (isAdminView) {
+                document.getElementById("studentPortal").classList.add("hidden");
+                document.getElementById("adminPortal").classList.remove("hidden");
+                btn.innerText = i18nDict[lang].btn_student_portal;
+            } else {
+                document.getElementById("adminPortal").classList.add("hidden");
+                document.getElementById("studentPortal").classList.remove("hidden");
+                btn.innerText = i18nDict[lang].btn_admin_portal;
+            }
+        }
+
+        const i18nDict = {
+            en: {
+                nav_title: "Sathyabama Portal", btn_admin_portal: "Admin Portal", btn_student_portal: "Student Portal",
+                welcome_title: "Welcome to Sathyabama", welcome_desc: "Your intelligent campus guide. Powered by Hybrid AI.",
+                chat_title: "Sathyabama AI Agent", chat_welcome_msg: "Hello! Try asking me 'Where is the library?'",
+                chat_placeholder: "Ask complex questions about campus...",
+                map_title: "Campus GPS Directory", btn_go: "Go 📍",
+                loc_gate: "Main Gate", loc_block_a: "Block A", loc_block_b: "Block B", loc_lib: "Library", loc_mess: "Mess",
+                loc_audi: "Auditorium", loc_b_hostel: "Boys Hostel", loc_g_hostel: "Girls Hostel", loc_exam: "Exam Hall 1"
+            },
+            ta: {
+                nav_title: "சத்யபாமா இணையவாசல்", btn_admin_portal: "நிர்வாகி இணையவாசல்", btn_student_portal: "மாணவர் இணையவாசல்",
+                welcome_title: "சத்யபாமாவுக்கு வரவேற்கிறோம்", welcome_desc: "உங்கள் அறிவார்ந்த வழிகாட்டி.",
+                chat_title: "சத்யபாமா AI வழிகாட்டி", chat_welcome_msg: "வணக்கம்! வளாகம் பற்றிய கேள்விகளை கேளுங்கள்.",
+                chat_placeholder: "கேள்விகளை கேட்கவும்...",
+                map_title: "வளாக வரைபட அடைவு", btn_go: "செல் 📍",
+                loc_gate: "நுழைவாயில்", loc_block_a: "பிளாக் ஏ", loc_block_b: "பிளாக் பி", loc_lib: "நூலகம்", loc_mess: "உணவகம்",
+                loc_audi: "கலையரங்கம்", loc_b_hostel: "ஆண்கள் விடுதி", loc_g_hostel: "பெண்கள் விடுதி", loc_exam: "தேர்வு கூடம்"
+            },
+            hi: {
+                nav_title: "सत्यभामा पोर्टल", btn_admin_portal: "व्यवस्थापक पोर्टल", btn_student_portal: "छात्र पोर्टल",
+                welcome_title: "सत्यभामा में आपका स्वागत है", welcome_desc: "आपका बुद्धिमान कैंपस गाइड।",
+                chat_title: "सत्यभामा AI मेंटर", chat_welcome_msg: "नमस्ते! परिसर के बारे में प्रश्न पूछें।",
+                chat_placeholder: "प्रश्न पूछें...",
+                map_title: "कैंपस जीपीएस निर्देशिका", btn_go: "जाएँ 📍",
+                loc_gate: "मुख्य द्वार", loc_block_a: "ब्लॉक ए", loc_block_b: "ब्लॉक बी", loc_lib: "पुस्तकालय", loc_mess: "भोजन कक्ष",
+                loc_audi: "सभागार", loc_b_hostel: "लड़कों का हॉस्टल", loc_g_hostel: "लड़कियों का हॉस्टल", loc_exam: "परीक्षा हॉल"
+            }
+        };
+
+        function changeLanguage() {
+            const lang = document.getElementById("langSelector").value;
+            const dict = i18nDict[lang];
+            document.querySelectorAll("[data-i18n]").forEach(el => {
+                const key = el.getAttribute("data-i18n");
+                if (dict[key]) el.innerText = dict[key];
+            });
+            document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+                const key = el.getAttribute("data-i18n-placeholder");
+                if (dict[key]) el.placeholder = dict[key];
+            });
+            const btn = document.getElementById("portalToggleBtn");
+            btn.innerText = isAdminView ? dict.btn_student_portal : dict.btn_admin_portal;
+        }
+
+        window.onload = () => {
+            changeLanguage();
+            fetchAnnouncement();
+            setInterval(fetchAnnouncement, 30000);
+        };
+    </script>
+</body>
+
+</html>

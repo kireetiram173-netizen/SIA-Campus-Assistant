@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+
+# Environment Variables & Secrets
+.env
+.env.local
+
+# Databases & Cache
+*.db-journal
+# Uncomment if you want to keep your sqlite database private:
+# sathyabama_students.db
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
